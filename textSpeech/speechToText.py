@@ -1,19 +1,24 @@
 import speech_recognition as sr
 
-r = sr.Recognizer()
+recognizer = sr.Recognizer()
 
-def speechToText():
-    try:
-        with sr.Microphone() as source:
-            r.adjust_for_ambient_noise(source, duration=0.2)
-            audio = r.listen(source)
-            text = r.recognize_google(audio)
-            text = text.lower()
+def speech_to_text():
+    with sr.Microphone() as source:
+        recognizer.adjust_for_ambient_noise(source, duration=0.5)
 
-            return text
-    except sr.RequestError as e:
-        print("Could not request results; {0}".format(e))
-    except sr.UnknownValueError:
-        print("Could not understand audio")
-    except KeyboardInterrupt:
-        print("Program terminated by user")
+        try:
+            audio = recognizer.listen(
+                source,
+                timeout=5,              # wait max 5 s to listen
+                phrase_time_limit=10    # register max 10 s
+            )
+
+            text = recognizer.recognize_google(audio)
+
+            return text.lower()
+        except sr.WaitTimeoutError: # No speech detected
+            return None
+        except sr.UnknownValueError: # Audio ununderstandable
+            return None
+        except sr.RequestError as e:
+            return None
