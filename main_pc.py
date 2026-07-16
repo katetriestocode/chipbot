@@ -1,18 +1,39 @@
 from textSpeech.vosk_stt import VoskSTT
 from LLM.google_llm import GoogleLLM
+from textSpeech.elevenlabs_tts import ElevenLabsTTS
+
 import serial
-import time
+
 import config
 
 BAUD = 115200
 
+try:
+    ser = serial.Serial(
+        config.SERIAL_PORT,
+        BAUD,
+        timeout=0.1
+    )
+    print(f"Pi connected on {config.SERIAL_PORT}")
+except Exception as e:
+    ser = None
+    print(f"Running without Pi ({e})")
+
+
+def send_pi(command: str):
+    if ser is None:
+        return
+
+    try:
+        ser.write((command + "\n").encode())
+    except Exception as e:
+        print("Serial error:", e)
+
 stt = VoskSTT()
 llm = GoogleLLM()
+tts = ElevenLabsTTS()
 
-ser = serial.Serial(SERIAL_PORT, BAUD)
-time.sleep(2)
-
-print("SnarkyShark PC is ready!")
+print("SnarkyShark is awake!")
 
 while True:
     text = stt.listen()
@@ -20,13 +41,15 @@ while True:
     if not text:
         continue
 
-    print(f"USER: {text}")
+    print(f"\nUSER: {text}")
 
     response = llm.generate(text)
 
+    print("\nBOT:")
+
     for sentence in response.sentences:
-        command = f"SAY|{sentence.emotion}|{sentence.text}\n"
+        print(f"[{sentence.emotion}] {sentence.text}")
 
-        print("SEND:", command.strip())
+        send_pi(sentence.emotion.upper())
 
-        ser.write(command.encode("utf-8"))
+        tts.say(sentence.text)

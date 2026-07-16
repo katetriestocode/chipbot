@@ -27,7 +27,6 @@ while True:
     print(emotion, text)
 
     # start_servos(emotion)
-    # leds(emotion)
 
     tts.say(text)
 

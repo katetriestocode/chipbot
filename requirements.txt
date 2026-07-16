@@ -10,3 +10,6 @@ python-dotenv
 soundfile
 
 pydantic
+
+serial
+pyserial
