@@ -2,20 +2,23 @@ import random
 import threading
 import time
 
-from gpiozero import AngularServo
+from gpiozero import Device, AngularServo
+from gpiozero.pins.lgpio import LGPIOFactory
+
+Device.pin_factory = LGPIOFactory()
 
 LEFT_SERVO = 12
 RIGHT_SERVO = 13
 
 EMOTIONS = {
-    "HAPPY":     (35, 55, 0.16, 0.22),
-    "EXCITED":   (60, 85, 0.08, 0.12),
-    "CURIOUS":   (25, 40, 0.30, 0.40),
-    "THINKING":  (15, 30, 0.50, 0.70),
-    "CONFUSED":  (45, 65, 0.20, 0.30),
-    "SLEEPY":    (8, 18, 0.70, 0.90),
-    "THANKFUL":  (30, 45, 0.22, 0.30),
-    "NEUTRAL":   (18, 30, 0.40, 0.55),
+    "HAPPY":    (40, 75, 0.08, 0.18),
+    "EXCITED":  (65, 90, 0.04, 0.10),
+    "CURIOUS":  (20, 55, 0.18, 0.40),
+    "THINKING": (8, 25, 0.40, 0.80),
+    "CONFUSED": (35, 70, 0.12, 0.25),
+    "SLEEPY":   (5, 15, 0.60, 1.00),
+    "THANKFUL": (25, 55, 0.12, 0.25),
+    "NEUTRAL":  (10, 35, 0.20, 0.50),
 }
 
 class ServoMotors:
@@ -25,19 +28,23 @@ class ServoMotors:
         self.left = AngularServo(
             LEFT_SERVO,
             min_angle=-90,
-            max_angle=90
+            max_angle=90,
+            min_pulse_width=0.0005,
+            max_pulse_width=0.0025
         )
 
         self.right = AngularServo(
             RIGHT_SERVO,
             min_angle=-90,
-            max_angle=90
+            max_angle=90,
+            min_pulse_width=0.0005,
+            max_pulse_width=0.0025
         )
 
         self.lock = threading.Lock()
 
-        self.emotion = "NEUTRAL"
         self.running = True
+        self.emotion = "NEUTRAL"
 
         self.left.angle = 0
         self.right.angle = 0
@@ -46,20 +53,21 @@ class ServoMotors:
             target=self._loop,
             daemon=True
         )
-
         self.thread.start()
 
     def react(self):
         with self.lock:
-            self.left.angle = 15
-            self.right.angle = -15
 
-            time.sleep(0.08)
+            self.left.angle = 35
+            self.right.angle = -35
+
+            time.sleep(0.10)
 
             self.left.angle = 0
             self.right.angle = 0
 
     def set_emotion(self, emotion):
+
         emotion = emotion.upper()
 
         if emotion not in EMOTIONS:
@@ -67,38 +75,36 @@ class ServoMotors:
 
         self.emotion = emotion
 
-    def _move(self, amp, speed):
-        with self.lock:
-
-            amp += random.randint(-5, 5)
-            speed += random.uniform(-0.03, 0.03)
-
-            amp = max(5, min(85, amp))
-            speed = max(0.05, speed)
-
-            self.left.angle = amp
-            self.right.angle = -amp
-
-            time.sleep(speed)
-
-            self.left.angle = -amp
-            self.right.angle = amp
-
-            time.sleep(speed)
-
     def _loop(self):
+
         while self.running:
 
             min_amp, max_amp, min_speed, max_speed = EMOTIONS[self.emotion]
 
             amp = random.randint(min_amp, max_amp)
+
+            if random.random() < 0.5:
+                amp = -amp
+
+            if random.random() < 0.12:
+                amp = random.choice([-1, 1]) * random.randint(75, 90)
+
             speed = random.uniform(min_speed, max_speed)
 
-            self._move(amp, speed)
+            with self.lock:
 
-            time.sleep(random.uniform(0.05, 0.25))
+                self.left.angle = amp
+                self.right.angle = -amp
+
+            time.sleep(speed)
+
+            if random.random() < 0.20:
+                time.sleep(random.uniform(0.5, 1.0))
+            else:
+                time.sleep(random.uniform(0.03, 0.15))
 
     def stop(self):
+
         self.running = False
 
         self.thread.join()
