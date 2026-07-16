@@ -1,2 +1,2 @@
 # SnarkyShark
-A shark plushy that makes snarky jokes!
+A shark plushy that makes snarky jokes, powered by an LLM!
