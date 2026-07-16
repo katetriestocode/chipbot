@@ -1,33 +1,30 @@
 from textSpeech.vosk_stt import VoskSTT
 from LLM.google_llm import GoogleLLM
+from textSpeech.elevenlabs_tts import ElevenLabsTTS
 
-import socket
+import requests
 
-PI_IP = "172.20.10.5"
-PORT = 5000
-
-def send_pi(emotion, text):
-    try:
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.settimeout(2)
-
-        s.connect((PI_IP, PORT))
-
-        s.sendall(
-            f"SAY|{emotion}|{text}".encode()
-        )
-
-        s.close()
-
-    except Exception as e:
-        print("Pi offline:", e)
+PI_IP = "172.20.10.5:5000"
 
 stt = VoskSTT()
 llm = GoogleLLM()
+tts = ElevenLabsTTS()
 
 print("SnarkyShark is awake!")
 
+def send_emotion(emotion):
+    try:
+        requests.post(
+            PI_IP + "/emotion",
+            json={"emotion": emotion},
+            timeout=0.2
+        )
+    except:
+        pass
+
+
 while True:
+
     text = stt.listen()
 
     if not text:
@@ -40,9 +37,11 @@ while True:
     print("\nBOT:")
 
     for sentence in response.sentences:
-        print(sentence.emotion, sentence.text)
 
-        send_pi(
-            sentence.emotion,
-            sentence.text
-        )
+        print(f"[{sentence.emotion}] {sentence.text}")
+
+        send_emotion(sentence.emotion)
+
+        tts.say(sentence.text)
+
+    send_emotion("NEUTRAL")
