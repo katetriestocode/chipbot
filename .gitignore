@@ -1,5 +1,10 @@
-.env
-.venv/
-.env
+# Vosk models
+vosk-model*/
+*.zip
+
+# Python
 __pycache__/
 *.pyc
+
+# Environment
+.env

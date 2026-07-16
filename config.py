@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Vosk
-VOSK_MODEL = "vosk-model-small-en-us-0.15"
+VOSK_MODEL = "vosk-model-en-us-0.22"
 
 SAMPLE_RATE = 16000
 BLOCK_SIZE = 8000
