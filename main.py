@@ -1,10 +1,9 @@
 from textSpeech.vosk_stt import VoskSTT
-from LLM.openai_llm import OpenAILLM
+from LLM.google_llm import GoogleLLM
 from textSpeech.elevenlabs_tts import ElevenLabsTTS
-import json
 
 stt = VoskSTT()
-llm = OpenAILLM()
+llm = GoogleLLM()
 tts = ElevenLabsTTS()
 
 print("SnarkyShark is awake!")
@@ -19,15 +18,9 @@ while True:
 
     response = llm.generate(text)
 
-    data = json.loads(response)
-
-    finalResponse = ""
-
-    for sentence in data["sentences"]:
-        emotion = sentence["emotion"]
-        text = sentence["text"]
-
-        finalResponse += f"[{emotion}] {text} "
+    for sentence in response.sentences:
+        finalResponse += f"[{sentence.emotion}] {sentence.text} "
+        tts.say(f"[{sentence.emotion}] {sentence.text}")
 
     print("BOT: " + finalResponse)
 

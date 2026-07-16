@@ -1,0 +1,12 @@
+vosk
+sounddevice
+numpy
+
+google-genai
+
+elevenlabs
+
+python-dotenv
+soundfile
+
+pydantic
