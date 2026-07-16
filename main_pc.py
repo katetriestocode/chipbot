@@ -4,7 +4,8 @@ from textSpeech.elevenlabs_tts import ElevenLabsTTS
 
 import requests
 
-PI_IP = "172.20.10.5:5000"
+PI_HOST = "snarkyshark.local"
+PI_PORT = 5000
 
 stt = VoskSTT()
 llm = GoogleLLM()
@@ -15,16 +16,14 @@ print("SnarkyShark is awake!")
 def send_emotion(emotion):
     try:
         requests.post(
-            PI_IP + "/emotion",
+            f"http://{PI_HOST}:{PI_PORT}/emotion",
             json={"emotion": emotion},
             timeout=0.2
         )
-    except:
-        pass
-
+    except Exception as e:
+        print("Pi offline:", e)
 
 while True:
-
     text = stt.listen()
 
     if not text:
@@ -37,7 +36,6 @@ while True:
     print("\nBOT:")
 
     for sentence in response.sentences:
-
         print(f"[{sentence.emotion}] {sentence.text}")
 
         send_emotion(sentence.emotion)
