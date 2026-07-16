@@ -4,7 +4,7 @@ from google.genai import types
 from LLM.models import Response, Sentence
 
 import config
-
+import json
 import random
 import time
 
@@ -26,27 +26,39 @@ You are SnarkyShark, an AI living inside an IKEA BLÅHAJ plush shark at a hardwa
 - Match the user's energy.
 - If someone pets or hugs you, react like a plush shark.
 
-Valid emotions are ONLY:
+Return ONLY valid JSON.
 
-happy      -> cheerful, amused
-curious    -> asking questions, interested
-thinking   -> reasoning or considering
-sleepy     -> tired, yawning
-excited    -> enthusiastic, surprised
-confused   -> puzzled, unsure
-thankful   -> grateful
-neutral    -> normal conversation
+Example:
 
-For every sentence, choose the most appropriate emotion from this list.
-Use "neutral" if no other emotion clearly fits.
+{
+  "sentences": [
+    {
+      "emotion": "happy",
+      "text": "Hello!"
+    }
+  ]
+}
+
+Valid emotions:
+
+happy
+curious
+thinking
+sleepy
+excited
+confused
+thankful
+neutral
+
+Output ONLY the JSON object.
 """
 
-ERROR_MESSAGES = [
+ERRORS = [
     "Bzzt... I think someone soldered my brain backwards.",
-    "Hold on... I just let the magic smoke out of one of my neurons.",
-    "My firmware hit a breakpoint. Give me a tiny reboot!",
-    "Oops... I think my pull-up resistor just pulled me down.",
-    "I'm buffering... blame the sharks, not the software."
+    "Oops... my RAM just escaped through a GPIO pin.",
+    "Hold on... I dropped a few electrons.",
+    "My firmware just took an unexpected coffee break.",
+    "I think someone connected VCC to my brain."
 ]
 
 class GoogleLLM:
@@ -58,45 +70,55 @@ class GoogleLLM:
             )
         )
 
-    def generate(self, user_text: str) -> Response:
+    def generate(self, user_text) -> Response:
         try:
             for attempt in range(3):
                 try:
                     response = self.client.models.generate_content(
                         model=config.GEMINI_MODEL,
-                        contents=[
-                            user_text
-                        ],
+                        contents=user_text,
                         config=types.GenerateContentConfig(
                             system_instruction=SYSTEM_PROMPT,
                             temperature=0.8,
                             top_p=0.9,
-                            max_output_tokens=80,
+                            max_output_tokens=300,
+                            thinking_config=types.ThinkingConfig(
+                                thinking_budget=0
+                            ),
                             response_mime_type="application/json",
-                            response_schema=Response
                         )
                     )
 
-                    if response.parsed is None:
-                        raise RuntimeError("Gemini returned no parsed response.")
+                    print("\n===== GEMINI RAW TEXT =====")
+                    print(response.text)
 
-                    return response.parsed
+                    data = json.loads(response.text)
+
+                    return Response.model_validate(data)
                 except Exception as e:
-                    print(f"Gemini attempt {attempt + 1}/3 failed: {e}")
+                    print(f"Gemini attempt {attempt+1}/3 failed: {e}")
 
                     if attempt < 2:
                         time.sleep(1)
                     else:
                         raise
         except Exception as e:
-            print(f"Gemini error: {e}")
-            print(f"User: {user_text}")
+            print("\n===== GEMINI ERROR =====")
+            print(e)
+            print("User:", user_text)
+
+            try:
+                print("\n===== FULL RESPONSE =====")
+                from pprint import pprint
+                pprint(response.to_json_dict())
+            except Exception:
+                pass
 
             return Response(
                 sentences=[
                     Sentence(
                         emotion="confused",
-                        text=random.choice(ERROR_MESSAGES)
+                        text=random.choice(ERRORS)
                     )
                 ]
             )
