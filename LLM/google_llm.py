@@ -1,11 +1,12 @@
 from google import genai
 from google.genai import types
 
-from models import Response, Sentence
+from LLM.models import Response, Sentence
 
 import config
 
 import random
+import time
 
 SYSTEM_PROMPT = """
 You are SnarkyShark, an AI living inside an IKEA BLÅHAJ plush shark at a hardware hackathon.
@@ -59,25 +60,34 @@ class GoogleLLM:
 
     def generate(self, user_text: str) -> Response:
         try:
-            response = self.client.models.generate_content(
-                model=config.GEMINI_MODEL,
-                contents=[
-                    user_text
-                ],
-                config=types.GenerateContentConfig(
-                    system_instruction=SYSTEM_PROMPT,
-                    temperature=0.8,
-                    top_p=0.9,
-                    max_output_tokens=80,
-                    response_mime_type="application/json",
-                    response_schema=Response
-                )
-            )
+            for attempt in range(3):
+                try:
+                    response = self.client.models.generate_content(
+                        model=config.GEMINI_MODEL,
+                        contents=[
+                            user_text
+                        ],
+                        config=types.GenerateContentConfig(
+                            system_instruction=SYSTEM_PROMPT,
+                            temperature=0.8,
+                            top_p=0.9,
+                            max_output_tokens=80,
+                            response_mime_type="application/json",
+                            response_schema=Response
+                        )
+                    )
 
-            if response.parsed is None:
-                raise RuntimeError("Gemini returned no parsed response.")
+                    if response.parsed is None:
+                        raise RuntimeError("Gemini returned no parsed response.")
 
-            return response.parsed
+                    return response.parsed
+                except Exception as e:
+                    print(f"Gemini attempt {attempt + 1}/3 failed: {e}")
+
+                    if attempt < 2:
+                        time.sleep(1)
+                    else:
+                        raise
         except Exception as e:
             print(f"Gemini error: {e}")
             print(f"User: {user_text}")

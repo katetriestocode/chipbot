@@ -18,6 +18,8 @@ while True:
 
     response = llm.generate(text)
 
+    finalResponse = ""
+
     for sentence in response.sentences:
         finalResponse += f"[{sentence.emotion}] {sentence.text} "
         tts.say(f"[{sentence.emotion}] {sentence.text}")

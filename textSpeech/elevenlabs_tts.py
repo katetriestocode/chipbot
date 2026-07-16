@@ -1,5 +1,5 @@
 from elevenlabs.client import ElevenLabs
-from elevenlabs import play
+from elevenlabs.play import play
 
 import config
 
