@@ -20,10 +20,10 @@ while True:
 
     finalResponse = ""
 
-    for sentence in response.sentences:
-        finalResponse += f"[{sentence.emotion}] {sentence.text} "
-        tts.say(f"[{sentence.emotion}] {sentence.text}")
+    print("BOT: ")
 
-    print("BOT: " + finalResponse)
+    for sentence in response.sentences:
+        print(f"   [{sentence.emotion}] {sentence.text} ")
+        finalResponse += f"{sentence.text} "
 
     tts.say(finalResponse)
