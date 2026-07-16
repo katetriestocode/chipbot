@@ -1,3 +1,5 @@
+# This is to run all the AI locally
+
 from textSpeech.vosk_stt import VoskSTT
 from LLM.google_llm import GoogleLLM
 from textSpeech.elevenlabs_tts import ElevenLabsTTS

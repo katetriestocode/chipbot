@@ -21,3 +21,6 @@ GEMINI_TIMEOUT_MS = int(os.getenv("GEMINI_TIMEOUT_MS", "10000"))
 # ElevenLabs
 ELEVEN_API_KEY = os.getenv("ELEVEN_API_KEY", "")
 ELEVEN_VOICE_ID = os.getenv("ELEVEN_VOICE_ID", "")
+
+# Serial
+SERIAL_PORT = os.getenv("SERIAL_PORT", "")
