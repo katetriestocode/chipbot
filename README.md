@@ -12,4 +12,36 @@ It features:
 5. camera
 6. hat (new!)
 
+## Execute the code
+### Install the requirements
+```bash
+pip install -r requirements.txt
+```
+or
+```bash
+python3 -m pip install -r requirements.txt
+```
 
+### Environment Variables
+```ENV
+ELEVEN_API_KEY = ""
+ELEVEN_VOICE_ID = ""
+
+GEMINI_API_KEY = ""
+GEMINI_MODEL = "gemini-flash-latest"
+GEMINI_TIMEOUT_MS = 10000
+
+SERIAL_PORT = "/dev/tty.usbserial-<INSERT_PORT>"
+
+```
+
+### Run the code
+From the computer:
+```bash
+python3 main_pc.py
+```
+
+From the Raspberry Pi Zero 2W:
+```bash
+python3 main_pi.py
+```

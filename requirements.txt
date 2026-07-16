@@ -13,3 +13,5 @@ pydantic
 
 serial
 pyserial
+
+pigpio

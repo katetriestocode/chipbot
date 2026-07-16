@@ -1,4 +1,5 @@
 from textSpeech.elevenlabs_tts import ElevenLabsTTS
+from servoMotors import ServoMotors
 
 import serial
 
@@ -6,28 +7,37 @@ tts = ElevenLabsTTS()
 
 ser = serial.Serial("/dev/ttyACM0", 115200)
 
+servos = ServoMotors()
+
 print("SnarkyShark Pi is ready!")
 
-while True:
-    line = ser.readline().decode().strip()
+try:
+    while True:
+        line = ser.readline().decode().strip()
 
-    if not line:
-        continue
+        if not line:
+            continue
 
-    print(line)
+        print(line)
 
-    try:
-        command, emotion, text = line.split("|",2)
-    except ValueError:
-        continue
+        try:
+            command, emotion, text = line.split("|",2)
+        except ValueError:
+            continue
 
-    if command != "SAY":
-        continue
+        if command != "SAY":
+            continue
 
-    print(emotion, text)
+        print(emotion, text)
 
-    # start_servos(emotion)
+        servos.react()
+        servos.set_emotion(emotion)
 
-    tts.say(text)
+        try:
+            tts.say(text)
+        except Exception as e:
+            print("TTS error:", e)
 
-    # stop_servos()
+        servos.set_emotion("NEUTRAL")
+finally:
+    servos.stop()
