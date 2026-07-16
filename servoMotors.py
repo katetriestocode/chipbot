@@ -1,38 +1,47 @@
+import random
 import threading
 import time
-import pigpio
-import random
+
+from gpiozero import AngularServo
 
 LEFT_SERVO = 12
 RIGHT_SERVO = 13
 
-CENTER = 1500
-
 EMOTIONS = {
-    "HAPPY": (220, 280, 0.16, 0.22),
-    "EXCITED": (420, 500, 0.08, 0.12),
-    "CURIOUS": (150, 220, 0.30, 0.40),
-    "THINKING": (90, 150, 0.50, 0.70),
-    "CONFUSED": (300, 380, 0.20, 0.30),
-    "SLEEPY": (60, 100, 0.70, 0.90),
-    "THANKFUL": (180, 240, 0.22, 0.30),
-    "NEUTRAL": (120, 180, 0.40, 0.55),
+    "HAPPY":     (35, 55, 0.16, 0.22),
+    "EXCITED":   (60, 85, 0.08, 0.12),
+    "CURIOUS":   (25, 40, 0.30, 0.40),
+    "THINKING":  (15, 30, 0.50, 0.70),
+    "CONFUSED":  (45, 65, 0.20, 0.30),
+    "SLEEPY":    (8, 18, 0.70, 0.90),
+    "THANKFUL":  (30, 45, 0.22, 0.30),
+    "NEUTRAL":   (18, 30, 0.40, 0.55),
 }
 
-class ServoMotors:
-    def __init__(self):
-        self.pi = pigpio.pi()
 
-        if not self.pi.connected:
-            raise RuntimeError("pigpiod is not running")
-        
+class ServoMotors:
+
+    def __init__(self):
+
+        self.left = AngularServo(
+            LEFT_SERVO,
+            min_angle=-90,
+            max_angle=90
+        )
+
+        self.right = AngularServo(
+            RIGHT_SERVO,
+            min_angle=-90,
+            max_angle=90
+        )
+
         self.lock = threading.Lock()
 
         self.emotion = "NEUTRAL"
         self.running = True
 
-        self.pi.set_servo_pulsewidth(LEFT_SERVO, CENTER)
-        self.pi.set_servo_pulsewidth(RIGHT_SERVO, CENTER)
+        self.left.angle = 0
+        self.right.angle = 0
 
         self.thread = threading.Thread(
             target=self._loop,
@@ -40,16 +49,16 @@ class ServoMotors:
         )
 
         self.thread.start()
-    
+
     def react(self):
         with self.lock:
-            self.pi.set_servo_pulsewidth(LEFT_SERVO, CENTER + 80)
-            self.pi.set_servo_pulsewidth(RIGHT_SERVO, CENTER - 80)
+            self.left.angle = 15
+            self.right.angle = -15
 
             time.sleep(0.08)
 
-            self.pi.set_servo_pulsewidth(LEFT_SERVO, CENTER)
-            self.pi.set_servo_pulsewidth(RIGHT_SERVO, CENTER)
+            self.left.angle = 0
+            self.right.angle = 0
 
     def set_emotion(self, emotion):
         emotion = emotion.upper()
@@ -60,44 +69,29 @@ class ServoMotors:
         self.emotion = emotion
 
     def _move(self, amp, speed):
+
         with self.lock:
-            amp += random.randint(-30, 30)
+
+            amp += random.randint(-5, 5)
             speed += random.uniform(-0.03, 0.03)
 
+            amp = max(5, min(85, amp))
             speed = max(0.05, speed)
 
-            left = max(500, min(2500, CENTER + amp))
-            right = max(500, min(2500, CENTER - amp))
-
-            self.pi.set_servo_pulsewidth(
-                LEFT_SERVO,
-                left
-            )
-
-            self.pi.set_servo_pulsewidth(
-                RIGHT_SERVO,
-                right
-            )
+            self.left.angle = amp
+            self.right.angle = -amp
 
             time.sleep(speed)
 
-            left = max(500, min(2500, CENTER - amp))
-            right = max(500, min(2500, CENTER + amp))
-
-            self.pi.set_servo_pulsewidth(
-                LEFT_SERVO,
-                left
-            )
-
-            self.pi.set_servo_pulsewidth(
-                RIGHT_SERVO,
-                right
-            )
+            self.left.angle = -amp
+            self.right.angle = amp
 
             time.sleep(speed)
 
     def _loop(self):
+
         while self.running:
+
             min_amp, max_amp, min_speed, max_speed = EMOTIONS[self.emotion]
 
             amp = random.randint(min_amp, max_amp)
@@ -112,7 +106,10 @@ class ServoMotors:
 
         self.thread.join()
 
-        self.pi.set_servo_pulsewidth(LEFT_SERVO, 0)
-        self.pi.set_servo_pulsewidth(RIGHT_SERVO, 0)
+        self.left.angle = 0
+        self.right.angle = 0
 
-        self.pi.stop()
+        time.sleep(0.2)
+
+        self.left.detach()
+        self.right.detach()
