@@ -1,34 +1,39 @@
 from textSpeech.elevenlabs_tts import ElevenLabsTTS
 from servoMotors import ServoMotors
 
-import serial
+import socket
+
+HOST = "0.0.0.0"
+PORT = 5000
 
 tts = ElevenLabsTTS()
-
-ser = serial.Serial("/dev/ttyACM0", 115200)
-
 servos = ServoMotors()
 
-print("SnarkyShark Pi is ready!")
+server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+server.bind((HOST, PORT))
+server.listen(1)
+
+print("SnarkyShark Pi ready on port", PORT)
 
 try:
     while True:
-        line = ser.readline().decode().strip()
+        conn, addr = server.accept()
 
-        if not line:
+        data = conn.recv(8192).decode().strip()
+        conn.close()
+
+        if not data:
             continue
 
-        print(line)
+        print(data)
 
         try:
-            command, emotion, text = line.split("|",2)
+            command, emotion, text = data.split("|", 2)
         except ValueError:
             continue
 
         if command != "SAY":
             continue
-
-        print(emotion, text)
 
         servos.react()
         servos.set_emotion(emotion)
@@ -36,7 +41,7 @@ try:
         try:
             tts.say(text)
         except Exception as e:
-            print("TTS error:", e)
+            print(e)
 
         servos.set_emotion("NEUTRAL")
 finally:
