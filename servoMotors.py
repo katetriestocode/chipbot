@@ -18,7 +18,6 @@ EMOTIONS = {
     "NEUTRAL":   (18, 30, 0.40, 0.55),
 }
 
-
 class ServoMotors:
 
     def __init__(self):
@@ -69,7 +68,6 @@ class ServoMotors:
         self.emotion = emotion
 
     def _move(self, amp, speed):
-
         with self.lock:
 
             amp += random.randint(-5, 5)
@@ -89,7 +87,6 @@ class ServoMotors:
             time.sleep(speed)
 
     def _loop(self):
-
         while self.running:
 
             min_amp, max_amp, min_speed, max_speed = EMOTIONS[self.emotion]
