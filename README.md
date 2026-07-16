@@ -12,6 +12,9 @@ It features:
 5. camera
 6. hat (new!)
 
+## Wiring Diagram
+<img width="1226" height="844" alt="Bildschirmfoto 2026-07-16 um 15 17 10" src="https://github.com/user-attachments/assets/f47e5d18-dab3-4975-bc33-079a169fede9" />
+
 ## Execute the code
 ### Install the requirements
 ```bash
