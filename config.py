@@ -1,20 +1,15 @@
 import os
 
-ELEVENLABS_API_KEY = os.environ.get("ELEVENLABS_API_KEY", "")
-ELEVENLABS_AGENT_ID = os.environ.get("ELEVENLABS_AGENT_ID", "")
-
+# Vosk
 VOSK_MODEL = "models/vosk-model-small-en-us-0.15"
 
 SAMPLE_RATE = 16000
 BLOCK_SIZE = 8000
 
-#   GPIO18 (pin 12) = BCLK   -> shared by mic and amp
-#   GPIO19 (pin 35) = LRCLK  -> shared by mic and amp
-#   GPIO20 (pin 38) = DIN    -> from mic's data-out pin (e.g. INMP441 "SD")
-#   GPIO21 (pin 40) = DOUT   -> to amp's data-in pin   (e.g. MAX98357A "DIN")
-AUDIO_SAMPLE_RATE = 16000  # required by the ElevenLabs Agent audio protocol
-AUDIO_CHANNELS = 1
-AUDIO_CHUNK_SAMPLES = 1600  # 100ms chunks at 16kHz
+# OpenAI
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
+OPENAI_MODEL = "gpt-4.1-mini"
 
-AUDIO_INPUT_DEVICE = os.environ.get("CHIPBOT_AUDIO_INPUT_DEVICE", "plughw:1,0")
-AUDIO_OUTPUT_DEVICE = os.environ.get("CHIPBOT_AUDIO_OUTPUT_DEVICE", "plughw:1,0")
+# ElevenLabs
+ELEVEN_API_KEY = os.getenv("ELEVEN_API_KEY", "")
+ELEVEN_VOICE_ID = os.getenv("ELEVEN_VOICE_ID", "")

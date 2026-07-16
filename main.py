@@ -14,10 +14,10 @@ while True:
     if not text:
         continue
 
-    print("USER: " + text)
+    print(f"USER: {text}")
 
     response = llm.generate(text)
 
-    print("BOT: " + response)
+    print(f"BOT: {response}")
 
     tts.say(response)
