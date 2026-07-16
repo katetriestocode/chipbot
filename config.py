@@ -1,4 +1,7 @@
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Vosk
 VOSK_MODEL = "models/vosk-model-small-en-us-0.15"
