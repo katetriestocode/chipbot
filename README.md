@@ -45,3 +45,8 @@ From the Raspberry Pi Zero 2W:
 ```bash
 python3 main_pi.py
 ```
+
+### SSH Connection with the Raspberry Pi Zero 2W
+```bash
+ssh snarkyshark@snarkyshark.local
+```
