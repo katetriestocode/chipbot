@@ -4,9 +4,7 @@ import time
 
 import sounddevice as sd
 from elevenlabs.conversational_ai.conversation import AudioInterface
-
-import demo.config as config
-
+import config
 
 class ChipBotAudioInterface(AudioInterface):
     def __init__(self):

@@ -4,8 +4,7 @@ from elevenlabs.client import ElevenLabs
 from elevenlabs.conversational_ai.conversation import Conversation
 
 import config
-from audio_interface import ChipBotAudioInterface
-
+from audio import ChipBotAudioInterface
 
 def main():
     if not config.ELEVENLABS_API_KEY or not config.ELEVENLABS_AGENT_ID:
