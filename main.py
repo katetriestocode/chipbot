@@ -1,6 +1,7 @@
 from textSpeech.vosk_stt import VoskSTT
 from LLM.openai_llm import OpenAILLM
 from textSpeech.elevenlabs_tts import ElevenLabsTTS
+import json
 
 stt = VoskSTT()
 llm = OpenAILLM()
@@ -18,6 +19,16 @@ while True:
 
     response = llm.generate(text)
 
-    print(f"BOT: {response}")
+    data = json.loads(response)
 
-    tts.say(response)
+    finalResponse = ""
+
+    for sentence in data["sentences"]:
+        emotion = sentence["emotion"]
+        text = sentence["text"]
+
+        finalResponse += f"[{emotion}] {text} "
+
+    print("BOT: " + finalResponse)
+
+    tts.say(finalResponse)
